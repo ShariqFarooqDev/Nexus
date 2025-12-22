@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { Lock, Eye, EyeOff } from 'lucide-react';
+import { Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { z } from 'zod';
+import { toast } from 'react-hot-toast';
 
 const passwordSchema = z.object({
   password: z.string()
     .min(8, 'Password must be at least 8 characters')
     .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
     .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number')
-    .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character'),
+    .regex(/[0-9]/, 'Password must contain at least one number'),
   confirmPassword: z.string()
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
@@ -20,6 +20,7 @@ interface StepFourProps {
   confirmPassword: string;
   onUpdate: (field: 'password' | 'confirmPassword', value: string) => void;
   onSubmit: () => void;
+  loading?: boolean;
 }
 
 export const StepFour: React.FC<StepFourProps> = ({
@@ -27,6 +28,7 @@ export const StepFour: React.FC<StepFourProps> = ({
   confirmPassword,
   onUpdate,
   onSubmit,
+  loading = false,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -76,6 +78,7 @@ export const StepFour: React.FC<StepFourProps> = ({
             onChange={(e) => onUpdate('password', e.target.value)}
             className="pl-10 pr-10 block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
             required
+            disabled={loading}
           />
           <button
             type="button"
@@ -94,13 +97,12 @@ export const StepFour: React.FC<StepFourProps> = ({
             <div className="flex items-center space-x-2">
               <div className="flex-1 h-2 bg-gray-200 rounded-full">
                 <div
-                  className={`h-full rounded-full transition-all ${
-                    passwordStrength.strength <= 2
+                  className={`h-full rounded-full transition-all ${passwordStrength.strength <= 2
                       ? 'bg-red-500'
                       : passwordStrength.strength <= 3
-                      ? 'bg-yellow-500'
-                      : 'bg-green-500'
-                  }`}
+                        ? 'bg-yellow-500'
+                        : 'bg-green-500'
+                    }`}
                   style={{ width: `${(passwordStrength.strength / 5) * 100}%` }}
                 />
               </div>
@@ -125,6 +127,7 @@ export const StepFour: React.FC<StepFourProps> = ({
             onChange={(e) => onUpdate('confirmPassword', e.target.value)}
             className="pl-10 pr-10 block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
             required
+            disabled={loading}
           />
           <button
             type="button"
@@ -142,9 +145,10 @@ export const StepFour: React.FC<StepFourProps> = ({
 
       <button
         type="submit"
-        className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors dark:bg-blue-500 dark:hover:bg-blue-600"
+        disabled={loading}
+        className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors dark:bg-blue-500 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Create Account
+        {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Create Account'}
       </button>
     </form>
   );

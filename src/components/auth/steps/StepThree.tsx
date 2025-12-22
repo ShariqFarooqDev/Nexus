@@ -1,5 +1,6 @@
 import React from 'react';
 import { Briefcase } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 interface StepThreeProps {
   userType: string;
@@ -37,7 +38,6 @@ export const StepThree: React.FC<StepThreeProps> = ({ userType, onUpdate, onNext
             <option value="">Select user type</option>
             <option value="entrepreneur">Entrepreneur</option>
             <option value="investor">Investor</option>
-            <option value="general">General User</option>
           </select>
         </div>
       </div>

@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { KeyRound } from 'lucide-react';
-import { emailService } from '../../../services/emailService';
+import { KeyRound, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { authApi } from '../../../services/api';
 
 interface StepTwoProps {
   email: string;
-  onVerified: () => void;
+  onVerified: (otp: string) => void;
+  loading?: boolean;
 }
 
-export const StepTwo: React.FC<StepTwoProps> = ({ email, onVerified }) => {
+export const StepTwo: React.FC<StepTwoProps> = ({ email, onVerified, loading = false }) => {
   const [otp, setOtp] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [countdown, setCountdown] = useState(30);
+  const [resending, setResending] = useState(false);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -23,34 +25,31 @@ export const StepTwo: React.FC<StepTwoProps> = ({ email, onVerified }) => {
 
   const handleVerifyOTP = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setVerifying(true);
 
     try {
-      const isValid = emailService.verifyOTP(email, otp);
-      
-      if (!isValid) {
-        toast.error('Invalid verification code. Please try again.');
-        return;
-      }
-
-      toast.success('Email verified successfully');
-      onVerified();
+      onVerified(otp);
     } catch (error) {
       toast.error('Invalid verification code. Please try again.');
     } finally {
-      setLoading(false);
+      setVerifying(false);
     }
   };
 
   const handleResendOTP = async () => {
+    setResending(true);
     try {
-      await emailService.sendOTP(email);
+      await authApi.resendOtp(email);
       setCountdown(30);
       toast.success('Verification code resent successfully');
     } catch (error) {
       toast.error('Failed to resend verification code');
+    } finally {
+      setResending(false);
     }
   };
+
+  const isSubmitting = loading || verifying;
 
   return (
     <form onSubmit={handleVerifyOTP} className="space-y-6">
@@ -72,18 +71,19 @@ export const StepTwo: React.FC<StepTwoProps> = ({ email, onVerified }) => {
           maxLength={6}
           value={otp}
           onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-          className="block w-full text-center text-2xl tracking-widest rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+          className="block w-full text-center text-2xl tracking-widest rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white py-4"
           placeholder="000000"
           required
+          disabled={isSubmitting}
         />
       </div>
 
       <button
         type="submit"
-        disabled={loading || otp.length !== 6}
-        className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors dark:bg-blue-500 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+        disabled={isSubmitting || otp.length !== 6}
+        className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors dark:bg-blue-500 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {loading ? 'Verifying...' : 'Verify Code'}
+        {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Verify Code'}
       </button>
 
       <div className="text-center">
@@ -95,9 +95,10 @@ export const StepTwo: React.FC<StepTwoProps> = ({ email, onVerified }) => {
           <button
             type="button"
             onClick={handleResendOTP}
-            className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+            disabled={resending}
+            className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 disabled:opacity-50"
           >
-            Resend verification code
+            {resending ? 'Sending...' : 'Resend verification code'}
           </button>
         )}
       </div>
