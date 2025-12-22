@@ -39,7 +39,7 @@ app.use(helmet({
 
 // CORS
 app.use(cors({
-    origin: config.frontendUrl,
+    origin: config.nodeEnv === 'production' ? true : config.frontendUrl,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -111,7 +111,7 @@ const startServer = async () => {
         await connectDB();
 
         // Start listening
-        server.listen(config.port, () => {
+        server.listen(config.port, '0.0.0.0', () => {
             console.log(`
 🚀 Nexus Server Started!
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
