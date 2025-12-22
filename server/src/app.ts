@@ -20,6 +20,11 @@ const __dirname = path.dirname(__filename);
 // Create Express app
 const app = express();
 
+// Trust proxy for deployments behind reverse proxy (Railway, Render, etc.)
+if (config.nodeEnv === 'production') {
+    app.set('trust proxy', 1);
+}
+
 // Create HTTP server
 const server = createServer(app);
 
