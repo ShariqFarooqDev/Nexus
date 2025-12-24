@@ -1,9 +1,20 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { LoginForm } from './LoginForm';
 import { SignupForm } from './SignupForm';
 
 export const AuthForms = () => {
+  const location = useLocation();
   const [isLogin, setIsLogin] = useState(true);
+
+  // Set initial form based on route
+  useEffect(() => {
+    if (location.pathname === '/signup') {
+      setIsLogin(false);
+    } else {
+      setIsLogin(true);
+    }
+  }, [location.pathname]);
 
   return (
     <div className="space-y-8">
