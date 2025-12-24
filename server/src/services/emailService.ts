@@ -7,32 +7,28 @@ interface EmailOptions {
   html?: string;
 }
 
-// Use Brevo HTTP API instead of SMTP (works on Railway)
+// Use Resend HTTP API for email delivery
 export const sendEmail = async (options: EmailOptions): Promise<void> => {
-  const apiKey = process.env.BREVO_API_KEY;
+  const apiKey = process.env.RESEND_API_KEY;
 
   if (!apiKey) {
-    console.error('BREVO_API_KEY not configured, skipping email');
+    console.error('RESEND_API_KEY not configured, skipping email');
     return;
   }
 
   const payload = {
-    sender: {
-      name: config.email.fromName,
-      email: config.email.fromEmail,
-    },
-    to: [{ email: options.to }],
+    from: `${config.email.fromName} <${config.email.fromEmail}>`,
+    to: [options.to],
     subject: options.subject,
-    htmlContent: options.html || options.text,
+    html: options.html || options.text,
   };
 
   try {
-    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        'accept': 'application/json',
-        'api-key': apiKey,
-        'content-type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),
     });
@@ -44,7 +40,7 @@ export const sendEmail = async (options: EmailOptions): Promise<void> => {
 
     console.log(`✅ Email sent to ${options.to}`);
   } catch (error) {
-    console.error('Failed to send email via Brevo API:', error);
+    console.error('Failed to send email via Resend:', error);
     throw error;
   }
 };
