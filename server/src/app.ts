@@ -13,6 +13,8 @@ import connectDB from './config/db.js';
 import { initializeSocket } from './config/socket.js';
 import routes from './routes/index.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/swagger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -92,6 +94,12 @@ app.use('/uploads', express.static(uploadsDir));
 
 // API routes
 app.use('/api', routes);
+
+// Swagger API Documentation
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'Nexus API Documentation',
+}));
 
 // Root route
 app.get('/', (req, res) => {
