@@ -178,6 +178,11 @@ export const shareDocument = async (
             });
         }
 
+        // Update status when sharing for signature
+        if (permission === 'sign' && document.status === 'draft') {
+            document.status = 'pending_signature';
+        }
+
         await document.save();
 
         // Notify user
