@@ -1,37 +1,56 @@
-import nodemailer from 'nodemailer';
 import config from '../config/env.js';
 
 interface EmailOptions {
-    to: string;
-    subject: string;
-    text?: string;
-    html?: string;
+  to: string;
+  subject: string;
+  text?: string;
+  html?: string;
 }
 
-const transporter = nodemailer.createTransport({
-    host: config.email.host,
-    port: config.email.port,
-    secure: config.email.port === 465,
-    auth: {
-        user: config.email.user,
-        pass: config.email.pass,
-    },
-});
-
+// Use Brevo HTTP API instead of SMTP (works on Railway)
 export const sendEmail = async (options: EmailOptions): Promise<void> => {
-    const mailOptions = {
-        from: `${config.email.fromName} <${config.email.fromEmail}>`,
-        to: options.to,
-        subject: options.subject,
-        text: options.text,
-        html: options.html,
-    };
+  const apiKey = process.env.BREVO_API_KEY;
 
-    await transporter.sendMail(mailOptions);
+  if (!apiKey) {
+    console.error('BREVO_API_KEY not configured, skipping email');
+    return;
+  }
+
+  const payload = {
+    sender: {
+      name: config.email.fromName,
+      email: config.email.fromEmail,
+    },
+    to: [{ email: options.to }],
+    subject: options.subject,
+    htmlContent: options.html || options.text,
+  };
+
+  try {
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': apiKey,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(JSON.stringify(error));
+    }
+
+    console.log(`✅ Email sent to ${options.to}`);
+  } catch (error) {
+    console.error('Failed to send email via Brevo API:', error);
+    throw error;
+  }
 };
 
 export const sendOTPEmail = async (email: string, otp: string): Promise<void> => {
-    const html = `
+  const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #2563eb;">Nexus - Verification Code</h2>
       <p>Your verification code is:</p>
@@ -45,18 +64,18 @@ export const sendOTPEmail = async (email: string, otp: string): Promise<void> =>
     </div>
   `;
 
-    await sendEmail({
-        to: email,
-        subject: 'Your Nexus Verification Code',
-        html,
-    });
+  await sendEmail({
+    to: email,
+    subject: 'Your Nexus Verification Code',
+    html,
+  });
 };
 
 export const sendWelcomeEmail = async (
-    email: string,
-    name: string
+  email: string,
+  name: string
 ): Promise<void> => {
-    const html = `
+  const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #2563eb;">Welcome to Nexus, ${name}! 🎉</h2>
       <p>Thank you for joining our community of entrepreneurs and investors.</p>
@@ -79,18 +98,18 @@ export const sendWelcomeEmail = async (
     </div>
   `;
 
-    await sendEmail({
-        to: email,
-        subject: 'Welcome to Nexus!',
-        html,
-    });
+  await sendEmail({
+    to: email,
+    subject: 'Welcome to Nexus!',
+    html,
+  });
 };
 
 export const sendPasswordResetEmail = async (
-    email: string,
-    resetUrl: string
+  email: string,
+  resetUrl: string
 ): Promise<void> => {
-    const html = `
+  const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #2563eb;">Password Reset Request</h2>
       <p>You requested a password reset. Click the button below to reset your password:</p>
@@ -108,20 +127,20 @@ export const sendPasswordResetEmail = async (
     </div>
   `;
 
-    await sendEmail({
-        to: email,
-        subject: 'Nexus - Password Reset',
-        html,
-    });
+  await sendEmail({
+    to: email,
+    subject: 'Nexus - Password Reset',
+    html,
+  });
 };
 
 export const sendMeetingInviteEmail = async (
-    email: string,
-    meetingTitle: string,
-    organizerName: string,
-    scheduledTime: Date
+  email: string,
+  meetingTitle: string,
+  organizerName: string,
+  scheduledTime: Date
 ): Promise<void> => {
-    const html = `
+  const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #2563eb;">Meeting Invitation</h2>
       <p>${organizerName} has invited you to a meeting:</p>
@@ -143,9 +162,9 @@ export const sendMeetingInviteEmail = async (
     </div>
   `;
 
-    await sendEmail({
-        to: email,
-        subject: `Meeting Invitation: ${meetingTitle}`,
-        html,
-    });
+  await sendEmail({
+    to: email,
+    subject: `Meeting Invitation: ${meetingTitle}`,
+    html,
+  });
 };
