@@ -23,6 +23,8 @@ export const uploadFile = async (
     return cloudinary.uploader.upload(filePath, {
         folder,
         resource_type: resourceType,
+        access_mode: 'public',
+        type: 'upload',
         ...options,
     });
 };
@@ -38,6 +40,8 @@ export const uploadBuffer = async (
             {
                 folder,
                 resource_type: resourceType,
+                access_mode: 'public',
+                type: 'upload',
                 ...options,
             },
             (error, result) => {
