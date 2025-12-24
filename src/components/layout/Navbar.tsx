@@ -32,11 +32,10 @@ const Navbar = () => {
               <Link
                 key={item.name}
                 to={item.href}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive(item.href)
-                    ? 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/50'
-                    : 'text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400'
-                }`}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive(item.href)
+                  ? 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/50'
+                  : 'text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400'
+                  }`}
               >
                 {item.name}
               </Link>
@@ -46,13 +45,13 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-4">
             <ThemeToggle />
             <button
-              onClick={() => navigate('/auth')}
+              onClick={() => navigate('/login')}
               className="px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
             >
               Log In
             </button>
             <button
-              onClick={() => navigate('/auth')}
+              onClick={() => navigate('/signup')}
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-md transition-colors"
             >
               Sign Up
@@ -78,11 +77,10 @@ const Navbar = () => {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`block px-3 py-2 rounded-md text-base font-medium ${
-                    isActive(item.href)
-                      ? 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/50'
-                      : 'text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400'
-                  }`}
+                  className={`block px-3 py-2 rounded-md text-base font-medium ${isActive(item.href)
+                    ? 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/50'
+                    : 'text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400'
+                    }`}
                   onClick={() => setIsOpen(false)}
                 >
                   {item.name}
@@ -91,7 +89,7 @@ const Navbar = () => {
               <div className="pt-4 space-y-2">
                 <button
                   onClick={() => {
-                    navigate('/auth');
+                    navigate('/login');
                     setIsOpen(false);
                   }}
                   className="w-full px-3 py-2 text-base font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
@@ -100,7 +98,7 @@ const Navbar = () => {
                 </button>
                 <button
                   onClick={() => {
-                    navigate('/auth');
+                    navigate('/signup');
                     setIsOpen(false);
                   }}
                   className="w-full px-3 py-2 text-base font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-md transition-colors"
